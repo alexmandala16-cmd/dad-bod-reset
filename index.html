@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dad Bod Reset — Tracker</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#0f1420" id="themeColorMeta">
+<script>
+  (function(){
+    var saved = localStorage.getItem("dbr_theme");
+    var theme = saved || "dark";
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+  :root{
+    --bg:#0a0d14; --bg-glow:radial-gradient(circle at 20% -10%, rgba(52,224,161,.10), transparent 45%), radial-gradient(circle at 90% 0%, rgba(255,157,66,.08), transparent 40%);
+    --panel:#141a26; --panel2:#1a2130; --input-bg:#0f141d; --border:rgba(255,255,255,.07);
+    --text:#f1f4fa; --muted:#8b93a8; --accent:#34e0a1; --accent2:#ff9d42; --on-accent:#04140d;
+    --good:#34e0a1; --on-good:#04140d; --warn:#ff5470; --line:rgba(255,255,255,.07);
+    --warn-bg:rgba(255,84,112,.12); --warn-text:#ffb4c2;
+    --good-bg:rgba(52,224,161,.12); --good-text:#bdf5df;
+    --shadow:0 1px 2px rgba(0,0,0,.2), 0 12px 28px rgba(0,0,0,.32);
+    --shadow-sm:0 1px 2px rgba(0,0,0,.24);
+    --radius:20px; --radius-sm:12px;
+  }
+  :root[data-theme="light"]{
+    --bg:#f4f6fb; --bg-glow:radial-gradient(circle at 20% -10%, rgba(14,159,110,.08), transparent 45%), radial-gradient(circle at 90% 0%, rgba(201,114,10,.06), transparent 40%);
+    --panel:#ffffff; --panel2:#f1f4f9; --input-bg:#ffffff; --border:rgba(20,30,50,.09);
+    --text:#131a26; --muted:#666f85; --accent:#0e9f6e; --accent2:#c9720a; --on-accent:#ffffff;
+    --good:#0e9f6e; --on-good:#ffffff; --warn:#d92d43; --line:rgba(20,30,50,.08);
+    --warn-bg:rgba(217,45,67,.08); --warn-text:#8f1f30;
+    --good-bg:rgba(14,159,110,.08); --good-text:#0b6b4b;
+    --shadow:0 1px 2px rgba(20,30,50,.04), 0 12px 24px rgba(20,30,50,.07);
+    --shadow-sm:0 1px 3px rgba(20,30,50,.06);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg); color:var(--text); min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+    transition:background-color .15s ease, color .15s ease;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:28px 20px calc(56px + env(safe-area-inset-bottom));}
+  header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px;}
+  h1{font-size:23px;font-weight:800;margin:0 0 4px;letter-spacing:-.02em;}
+  .sub{color:var(--muted);font-size:13.5px;margin:0;}
+  .header-right{display:flex;align-items:center;gap:12px;}
+  .theme-toggle{
+    width:42px;height:42px;border-radius:12px;border:1px solid var(--border);background:var(--panel);
+    color:var(--text);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;
+    touch-action:manipulation;box-shadow:var(--shadow-sm);transition:transform .12s ease, border-color .15s;
+  }
+  .theme-toggle:hover{border-color:var(--accent);transform:translateY(-1px);}
+  .streak{
+    background:var(--panel);box-shadow:var(--shadow-sm);
+    border:1px solid var(--border);border-radius:16px;padding:10px 18px;text-align:center;min-width:96px;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+  }
+  .streak .flame{color:var(--accent2);font-size:15px;line-height:1;}
+  .streak .num{font-size:24px;font-weight:800;color:var(--text);line-height:1.1;}
+  .streak .lbl{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+  .ring{
+    position:relative;width:56px;height:56px;border-radius:50%;flex:none;
+    background:conic-gradient(var(--accent) calc(var(--pct,0)*1%), var(--panel2) 0);
+    box-shadow:var(--shadow-sm);
+  }
+  .ring-inner{
+    position:absolute;inset:5px;background:var(--panel);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--text);
+  }
+  .card{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:22px;margin-bottom:16px;box-shadow:var(--shadow);
+  }
+  .card h2{font-size:14.5px;font-weight:700;margin:0 0 4px;display:flex;align-items:center;gap:10px;letter-spacing:-.01em;}
+  .card h2 .ic{
+    width:30px;height:30px;border-radius:9px;background:var(--good-bg);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;font-size:15px;flex:none;
+  }
+  .card .desc{color:var(--muted);font-size:12.5px;margin:0 0 16px;line-height:1.5;}
+  .phase-pill{
+    display:inline-block;background:var(--good-bg);color:var(--accent);font-weight:700;font-size:10.5px;
+    padding:3px 10px;border-radius:999px;margin-left:6px;vertical-align:middle;letter-spacing:.02em;
+  }
+  .checklist{display:flex;flex-direction:column;gap:8px;}
+  .item{
+    display:flex;align-items:center;gap:13px;background:var(--panel2);border:1px solid var(--border);
+    border-radius:var(--radius-sm);padding:13px 14px;cursor:pointer;user-select:none;transition:border-color .15s, transform .1s;
+    touch-action:manipulation;
+  }
+  .item:hover{border-color:var(--accent);}
+  .item:active{transform:scale(.995);}
+  .item.done{background:var(--good-bg);border-color:var(--good);}
+  .item .ic-chip{
+    width:34px;height:34px;border-radius:10px;background:var(--panel);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);flex:none;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .item.done .ic-chip{background:var(--accent);color:var(--on-accent);border-color:var(--accent);}
+  .item .box{
+    width:24px;height:24px;border-radius:50%;border:2px solid var(--muted);flex:0 0 24px;
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent;
+  }
+  .item.done .box{background:var(--good);border-color:var(--good);color:var(--on-good);font-weight:900;}
+  .item.done .box::after{content:"\2713";}
+  .item .txt{flex:1;font-size:14px;font-weight:500;}
+  .item .txt small{display:block;color:var(--muted);font-size:12px;margin-top:2px;font-weight:400;}
+  .row{display:flex;gap:16px;flex-wrap:wrap;}
+  .row .card{flex:1;min-width:280px;}
+  input[type=number], input[type=date], input[type=range], input[type=text], input[type=email], input[type=password]{
+    background:var(--input-bg);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:11px 12px;
+    font-size:14px;width:100%;min-height:42px;
+  }
+  input:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  label.field{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:6px;margin-top:12px;text-transform:uppercase;letter-spacing:.03em;}
+  .btn{
+    background:var(--accent);color:var(--on-accent);border:none;border-radius:var(--radius-sm);padding:12px 20px;
+    font-weight:700;font-size:13.5px;cursor:pointer;min-height:44px;touch-action:manipulation;
+    box-shadow:0 4px 14px rgba(52,224,161,.28);transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn:active{transform:translateY(0);}
+  .btn.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border);box-shadow:none;}
+  .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border);box-shadow:none;}
+  .btn.block{width:100%;padding:13px;font-size:14px;}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+  canvas{width:100%;max-width:100%;background:var(--input-bg);border-radius:var(--radius-sm);border:1px solid var(--border);}
+  .milestone{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line);position:relative;}
+  .milestone:last-child{border-bottom:none;}
+  .milestone .dot{width:13px;height:13px;border-radius:50%;background:var(--panel2);border:2px solid var(--muted);margin-top:4px;flex:none;}
+  .milestone.hit .dot{background:var(--good);border-color:var(--good);box-shadow:0 0 0 3px var(--good-bg);}
+  .milestone.active .dot{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 3px var(--good-bg);}
+  .milestone .m-title{font-weight:700;font-size:13.5px;}
+  .milestone .m-when{color:var(--muted);font-size:11px;margin-bottom:2px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;}
+  .milestone .m-target{color:var(--muted);font-size:12.5px;line-height:1.5;}
+  .quote{font-style:italic;font-size:15px;line-height:1.55;color:var(--text);border-left:3px solid var(--accent2);padding-left:16px;}
+  .quote small{display:block;margin-top:8px;color:var(--muted);font-style:normal;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+  .alcohol-rule{background:var(--panel2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;font-size:13.5px;line-height:1.55;}
+  .tag{display:inline-block;background:var(--panel);border:1px solid var(--border);color:var(--muted);font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;margin-right:6px;text-transform:uppercase;letter-spacing:.03em;}
+  .warnbox{background:var(--warn-bg);border:1px solid var(--warn);color:var(--warn-text);border-radius:var(--radius-sm);padding:12px 15px;font-size:13px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;line-height:1.5;}
+  .goodbox{background:var(--good-bg);border:1px solid var(--good);color:var(--good-text);border-radius:var(--radius-sm);padding:12px 15px;font-size:13px;margin-bottom:14px;line-height:1.5;}
+  footer{text-align:center;color:var(--muted);font-size:11px;margin-top:34px;line-height:1.7;}
+  .gymlist{display:flex;flex-direction:column;gap:6px;margin-top:8px;}
+  .gymrow{display:flex;justify-content:space-between;align-items:center;background:var(--panel2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;font-size:13px;font-weight:500;touch-action:manipulation;}
+  .gymrow.done{opacity:.5;text-decoration:line-through;}
+  .slider-val{font-weight:800;color:var(--accent2);}
+  .statgrid{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;}
+  .stattile{
+    flex:1;min-width:110px;background:var(--panel2);border:1px solid var(--border);border-radius:var(--radius-sm);
+    padding:14px 16px;
+  }
+  .stattile .v{font-size:21px;font-weight:800;color:var(--text);line-height:1.1;}
+  .stattile .l{font-size:10.5px;color:var(--muted);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;}
+  .stattile.on .v{color:var(--good);}
+  .stattile.off .v{color:var(--warn);}
+  .centerscreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg-glow);}
+  .authbox{max-width:380px;width:100%;background:var(--panel);border:1px solid var(--border);border-radius:24px;padding:32px 28px;box-shadow:var(--shadow);}
+  .brandmark{
+    width:52px;height:52px;border-radius:15px;background:linear-gradient(145deg, var(--accent), var(--accent2));
+    display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:24px;color:var(--on-accent);
+    box-shadow:0 8px 20px rgba(52,224,161,.3);
+  }
+  .authbox h1{text-align:center;font-size:22px;letter-spacing:-.02em;}
+  .authbox .sub{text-align:center;margin-bottom:22px;line-height:1.55;}
+  .toggle-link{color:var(--accent);cursor:pointer;text-decoration:none;font-weight:700;font-size:13px;}
+  .toggle-link:hover{text-decoration:underline;}
+  .errbox{background:var(--warn-bg);border:1px solid var(--warn);color:var(--warn-text);border-radius:var(--radius-sm);padding:9px 12px;font-size:12.5px;margin-top:10px;}
+  .price{font-size:38px;font-weight:800;color:var(--text);letter-spacing:-.02em;}
+  .price span{font-size:14px;color:var(--muted);font-weight:500;}
+  .feature-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;font-size:13.5px;line-height:1.4;}
+  .feature-item .check{
+    width:22px;height:22px;border-radius:50%;background:var(--good-bg);color:var(--good);flex:none;
+    display:flex;align-items:center;justify-content:center;font-size:13px;margin-top:1px;
+  }
+  .hidden{display:none !important;}
+  @media (max-width:480px){
+    .wrap{padding:18px 14px calc(56px + env(safe-area-inset-bottom));}
+    h1{font-size:20px;}
+    .card{padding:17px;border-radius:16px;}
+    .authbox{padding:26px 20px;border-radius:20px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen" class="centerscreen hidden">
+  <div class="authbox">
+    <div class="brandmark"><i class="ti ti-flame" aria-hidden="true"></i></div>
+    <h1>Dad Bod Reset</h1>
+    <p class="sub">You didn't get here from laziness — you got here from putting your family first. Now let's make sure you're around to enjoy it.</p>
+    <div id="authError"></div>
+    <label class="field">Email</label>
+    <input type="email" id="authEmail" placeholder="you@example.com">
+    <label class="field">Password</label>
+    <input type="password" id="authPassword" placeholder="At least 6 characters">
+    <div class="btnrow" style="flex-direction:column;">
+      <button class="btn block" id="authSubmitBtn" onclick="handleAuthSubmit()">Create account</button>
+    </div>
+    <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--muted);">
+      <span id="authModeLabel">Already have an account?</span>
+      <span class="toggle-link" onclick="toggleAuthMode()">Sign in</span>
+    </p>
+  </div>
+</div>
+
+<!-- PAYWALL SCREEN -->
+<div id="paywallScreen" class="centerscreen hidden">
+  <div class="authbox" style="max-width:420px;">
+    <div class="brandmark"><i class="ti ti-lock-open" aria-hidden="true"></i></div>
+    <h1>Unlock Dad Bod Reset</h1>
+    <p class="sub">Your account is created — subscribe to start tracking.</p>
+    <div style="text-align:center;margin:18px 0;">
+      <div class="price">$<span id="priceAmount">9</span><span>/month</span></div>
+    </div>
+    <div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:20px;">
+      <div class="feature-item"><div class="check"><i class="ti ti-check" aria-hidden="true"></i></div><div>Daily checklist synced across every device you use</div></div>
+      <div class="feature-item"><div class="check"><i class="ti ti-check" aria-hidden="true"></i></div><div>Phased training + mobility plan for a bad back and low mobility</div></div>
+      <div class="feature-item"><div class="check"><i class="ti ti-check" aria-hidden="true"></i></div><div>Streaks, weigh-in trend chart, monthly mobility check-ins</div></div>
+    </div>
+    <button class="btn block" onclick="startCheckout()">Subscribe</button>
+    <button class="btn ghost block" style="margin-top:8px;" onclick="refreshSubscription()">I already paid — refresh status</button>
+    <button class="btn ghost block" style="margin-top:8px;" onclick="signOut()">Sign out</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="wrap hidden" id="mainApp">
+
+  <header>
+    <div>
+      <h1>Dad Bod Reset<span id="phasePill" class="phase-pill">Phase 0</span></h1>
+      <p class="sub" id="dayCounter">Day 1 · Week 1</p>
+    </div>
+    <div class="header-right">
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleBtn" aria-label="Toggle light and dark mode"><i class="ti ti-moon" aria-hidden="true" id="themeToggleIcon"></i></button>
+      <div class="ring" id="todayRing" style="--pct:0;" title="Today's checklist progress"><div class="ring-inner" id="todayRingText">0/5</div></div>
+      <div class="streak">
+        <div class="flame"><i class="ti ti-flame" aria-hidden="true"></i></div>
+        <div class="num" id="streakNum">0</div>
+        <div class="lbl">day streak</div>
+      </div>
+    </div>
+  </header>
+
+  <div id="missWarn"></div>
+
+  <div class="card">
+    <div class="quote" id="quoteBox"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="ic"><i class="ti ti-check" aria-hidden="true"></i></span> Today's checklist <span class="sub" id="todayDate" style="font-weight:400;color:var(--muted);font-size:12px;margin-left:auto;"></span></h2>
+    <p class="desc">Tap to check off. Based on your current phase — <span id="phaseNote"></span></p>
+    <div class="checklist" id="checklist"></div>
+  </div>
+
+  <div class="card" id="gymCard" style="display:none;">
+    <h2><span class="ic"><i class="ti ti-barbell" aria-hidden="true"></i></span> Gym session</h2>
+    <p class="desc" id="gymDesc"></p>
+    <div class="gymlist" id="gymList"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="ic"><i class="ti ti-beer" aria-hidden="true"></i></span> Alcohol rule — this week</h2>
+    <div class="alcohol-rule" id="alcoholRule"></div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h2><span class="ic"><i class="ti ti-scale" aria-hidden="true"></i></span> Weekly weigh-in</h2>
+      <p class="desc">Same day, same conditions. Trend matters, not the daily number.</p>
+      <label class="field">Today's weight (lb)</label>
+      <input type="number" id="weightInput" step="0.1" placeholder="e.g. 243.5">
+      <label class="field">Waist at navel (in) — every 2 weeks</label>
+      <input type="number" id="waistInput" step="0.1" placeholder="e.g. 46.5">
+      <div class="btnrow"><button class="btn" onclick="logWeighIn()">Log entry</button></div>
+      <div id="measureStats" class="statgrid"></div>
+      <p class="desc" style="margin:12px 0 4px;">Weight trend</p>
+      <canvas id="weightChart" height="120"></canvas>
+      <p class="desc" style="margin:14px 0 4px;">Waist trend</p>
+      <canvas id="waistChart" height="120"></canvas>
+    </div>
+
+    <div class="card">
+      <h2><span class="ic"><i class="ti ti-stretching" aria-hidden="true"></i></span> Monthly check</h2>
+      <p class="desc">Do these once a month — they move faster than the scale.</p>
+      <div class="checklist">
+        <div class="item" data-mkey="floorSit"><div class="ic-chip"><i class="ti ti-yoga" aria-hidden="true"></i></div><div class="txt">Sit cross-legged on floor &amp; stand without hands</div><div class="box"></div></div>
+        <div class="item" data-mkey="toeTouch"><div class="ic-chip"><i class="ti ti-arrow-down" aria-hidden="true"></i></div><div class="txt">Touch toes with soft knees</div><div class="box"></div></div>
+        <div class="item" data-mkey="photo"><div class="ic-chip"><i class="ti ti-camera" aria-hidden="true"></i></div><div class="txt">Progress photo taken</div><div class="box"></div></div>
+      </div>
+      <label class="field">Energy / libido (1–10) — <span class="slider-val" id="energyVal">5</span></label>
+      <input type="range" id="energySlider" min="1" max="10" value="5">
+      <div class="btnrow"><button class="btn secondary" onclick="saveMonthly()">Save monthly check</button></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="ic"><i class="ti ti-map" aria-hidden="true"></i></span> Roadmap</h2>
+    <div id="roadmap"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="ic"><i class="ti ti-settings" aria-hidden="true"></i></span> Settings</h2>
+    <label class="field">Plan start date</label>
+    <input type="date" id="startDate">
+    <label class="field">Height (in) — used to set a healthy waist target</label>
+    <input type="number" id="heightInput" step="0.5" min="48" max="96" placeholder="e.g. 70">
+    <label class="field">Your personal goal (shown at the top of your roadmap)</label>
+    <input type="text" id="goalLabel" placeholder="e.g. Run a 5k with my son">
+    <label class="field">Goal target date</label>
+    <input type="date" id="goalDate">
+    <div class="btnrow">
+      <button class="btn secondary" onclick="saveSettings()">Save settings</button>
+      <button class="btn ghost" onclick="signOut()">Sign out</button>
+    </div>
+    <p class="sub" id="syncStatus" style="margin-top:10px;">—</p>
+  </div>
+
+  <footer>
+    Educational only — not a substitute for medical care.<br>
+    Never miss twice in a row.
+  </footer>
+</div>
+
+<script>
+/* ============ CONFIG — fill these in before deploying ============ */
+const SUPABASE_URL = "https://bmdvzrnhuunkgxpuwcea.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtZHZ6cm5odXVua2d4cHV3Y2VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNjI3MjksImV4cCI6MjA5ODgzODcyOX0.6mJGM50nQXE05jc1IpWPb_luKSo35lKMdAnDPRAonDg";
+const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/test_aFa7sKbbTe7UdeJc7G5wI00";
+const DISPLAY_PRICE = "9"; // just for display on the paywall, doesn't affect billing
+/* =================================================================== */
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let profile = null;
+let authMode = "signup"; // or "signin"
+let state = { days: {}, weighins: [], monthly: [] }; // in-memory cache, mirrors Supabase
+
+const QUOTES = [
+  ["Missing one day is life. Missing two in a row is how plans die.", "Rule #1"],
+  ["Motivation shows up after 2–3 weeks of momentum, not before. Don't wait for it to start.", ""],
+  ["Walk. Protein. Sleep. Less alcohol. That's the whole loop you're breaking.", ""],
+  ["You're not out-willpowering a hormonal state. You're changing the inputs that drive it.", ""],
+  ["Small and consistent beats intense and abandoned.", ""],
+  ["This is a strength and mobility goal as much as a weight goal.", ""],
+  ["This didn't come from laziness. It came from choosing your family over yourself for years. Time to do both.", ""],
+  ["Skipping the kids' leftovers is worth more than it looks — that habit alone runs about 350 quiet calories a day.", ""],
+  ["A 15-minute walk after dinner works better as a family habit than a solo workout you have to force.", ""],
+  ["Waist under half your height is the target that matters most — not the number on the scale.", ""],
+];
+
+/* ---------------- Auth ---------------- */
+
+function toggleAuthMode(){
+  authMode = authMode === "signup" ? "signin" : "signup";
+  document.getElementById("authSubmitBtn").textContent = authMode === "signup" ? "Create account" : "Sign in";
+  document.getElementById("authModeLabel").textContent = authMode === "signup" ? "Already have an account?" : "Need an account?";
+  document.querySelector(".toggle-link").textContent = authMode === "signup" ? "Sign in" : "Create one";
+}
+
+async function handleAuthSubmit(){
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+  const errBox = document.getElementById("authError");
+  errBox.innerHTML = "";
+  if(!email || password.length < 6){
+    errBox.innerHTML = '<div class="errbox">Enter an email and a password of at least 6 characters.</div>';
+    return;
+  }
+  const fn = authMode === "signup" ? sb.auth.signUp : sb.auth.signInWithPassword;
+  const { data, error } = await fn.call(sb.auth, { email, password });
+  if(error){
+    errBox.innerHTML = `<div class="errbox">${error.message}</div>`;
+    return;
+  }
+  if(authMode === "signup" && data.user && !data.session){
+    errBox.innerHTML = '<div class="goodbox">Check your email to confirm your account, then sign in.</div>';
+    return;
+  }
+  await onSignedIn();
+}
+
+async function signOut(){
+  await sb.auth.signOut();
+  location.reload();
+}
+
+async function onSignedIn(){
+  const { data: { user } } = await sb.auth.getUser();
+  currentUser = user;
+  if(!currentUser){ showScreen("auth"); return; }
+  await loadProfile();
+  if(!profile){ showScreen("auth"); return; }
+  if(profile.subscription_status !== "active"){
+    showScreen("paywall");
+  } else {
+    showScreen("app");
+    await loadAllData();
+    renderHeader();
+  }
+}
+
+async function loadProfile(){
+  const { data, error } = await sb.from("profiles").select("*").eq("id", currentUser.id).single();
+  if(!error) profile = data;
+}
+
+function showScreen(name){
+  document.getElementById("authScreen").classList.toggle("hidden", name !== "auth");
+  document.getElementById("paywallScreen").classList.toggle("hidden", name !== "paywall");
+  document.getElementById("mainApp").classList.toggle("hidden", name !== "app");
+}
+
+async function refreshSubscription(){
+  await loadProfile();
+  if(profile && profile.subscription_status === "active"){
+    showScreen("app");
+    await loadAllData();
+    renderHeader();
+  } else {
+    alert("Still not showing as active. Payments can take a minute to process — try again shortly, or check that the webhook is deployed if you're the developer testing this.");
+  }
+}
+
+function startCheckout(){
+  if(STRIPE_PAYMENT_LINK.startsWith("YOUR_")){
+    alert("Stripe Payment Link isn't configured yet — see setup instructions.");
+    return;
+  }
+  const url = new URL(STRIPE_PAYMENT_LINK);
+  url.searchParams.set("client_reference_id", currentUser.id);
+  url.searchParams.set("prefilled_email", currentUser.email);
+  window.location.href = url.toString();
+}
+
+/* ---------------- Data load/save (Supabase) ---------------- */
+
+async function loadAllData(){
+  const [daily, weighins, monthly] = await Promise.all([
+    sb.from("daily_logs").select("*").eq("user_id", currentUser.id),
+    sb.from("weighins").select("*").eq("user_id", currentUser.id).order("date"),
+    sb.from("monthly_checks").select("*").eq("user_id", currentUser.id).order("date"),
+  ]);
+  state.days = {};
+  (daily.data || []).forEach(r => {
+    state.days[r.date] = {
+      walk: r.walk, mobility: r.mobility, protein: r.protein, alcohol: r.alcohol,
+      sleep: r.sleep, gym: r.gym || {}, gymDay: r.gym_day,
+    };
+  });
+  state.weighins = (weighins.data || []).map(r => ({date: r.date, weight: r.weight, waist: r.waist}));
+  state.monthly = (monthly.data || []).map(r => ({date: r.date, energy: r.energy, floorSit: r.floor_sit, toeTouch: r.toe_touch, photo: r.photo}));
+  setSyncStatus("Synced " + new Date().toLocaleTimeString());
+}
+
+async function pushDaily(dateKey, entry){
+  const { error } = await sb.from("daily_logs").upsert({
+    user_id: currentUser.id, date: dateKey,
+    walk: !!entry.walk, mobility: !!entry.mobility, protein: !!entry.protein,
+    alcohol: !!entry.alcohol, sleep: !!entry.sleep, gym: entry.gym || {}, gym_day: !!entry.gymDay,
+  }, { onConflict: "user_id,date" });
+  setSyncStatus(error ? "Sync failed — retry later" : "Synced " + new Date().toLocaleTimeString());
+}
+
+async function pushWeighin(record){
+  const { error } = await sb.from("weighins").insert({ user_id: currentUser.id, date: record.date, weight: record.weight, waist: record.waist });
+  setSyncStatus(error ? "Sync failed — retry later" : "Synced " + new Date().toLocaleTimeString());
+}
+
+async function pushMonthly(record){
+  const { error } = await sb.from("monthly_checks").insert({
+    user_id: currentUser.id, date: record.date, energy: record.energy,
+    floor_sit: record.floorSit, toe_touch: record.toeTouch, photo: record.photo,
+  });
+  setSyncStatus(error ? "Sync failed — retry later" : "Synced " + new Date().toLocaleTimeString());
+}
+
+function setSyncStatus(msg){
+  const el = document.getElementById("syncStatus");
+  if(el) el.textContent = msg;
+}
+
+/* ---------------- Plan logic (same model as the personal version) ---------------- */
+
+function todayStr(d=new Date()){ return d.toISOString().slice(0,10); }
+function daysBetween(a,b){ return Math.floor((b-a)/86400000); }
+
+function getPhase(weekNum){
+  if(weekNum<=2) return 0;
+  if(weekNum<=6) return 1;
+  return 2;
+}
+function getWeekNum(){
+  const start = new Date((profile.plan_start_date || todayStr())+"T00:00:00");
+  const now = new Date(todayStr()+"T00:00:00");
+  const d = Math.max(0, daysBetween(start, now));
+  return Math.floor(d/7)+1;
+}
+
+const CHECKLIST_BASE = [
+  {key:"walk", icon:"ti-walk", label:"Walk", small0:"5–10 min, 2–3x today (whatever's pain-free)", small1:"Build toward 30 min today", small2:"45–60 min today (can split in two)"},
+  {key:"mobility", icon:"ti-stretching", label:"10-min mobility routine", small:"Cat-cow, McGill curl-up, side plank, bird dog, hip flexor stretch, 90/90, World's Greatest Stretch"},
+  {key:"protein", icon:"ti-meat", label:"Hit protein target", small:"Protein-forward breakfast, protein at every meal"},
+  {key:"alcohol", icon:"ti-beer", label:"Followed this week's alcohol rule", small:"See the Alcohol Rule card below"},
+  {key:"sleep", icon:"ti-moon", label:"Protected sleep", small:"Consistent wind-down, no alcohol close to bed"},
+];
+const GYM_EXERCISES_P1 = [
+  "Leg press — 3x12", "Seated chest press — 3x10-12", "Seated cable row — 3x10-12",
+  "Lat pulldown — 3x10-12", "Goblet squat (light) — 2x10, only if pain-free",
+  "Farmer's carry — 3x30 sec walk", "Plank — 3x20-30 sec",
+];
+const GYM_EXERCISES_P2 = [
+  "Same lifts as Phase 1, add small load or 1-2 reps", "Trap-bar deadlift (if back/knees cooperating)",
+  "Front-foot-elevated split squats", "Farmer's carry — heavier or longer", "Plank progression",
+];
+
+function dayEntry(dateKey){
+  if(!state.days[dateKey]) state.days[dateKey] = {};
+  return state.days[dateKey];
+}
+function coreItemsDone(entry){
+  return ["walk","mobility","protein","alcohol","sleep"].filter(k=>entry[k]).length;
+}
+
+function renderHeader(){
+  const week = getWeekNum();
+  const phase = getPhase(week);
+  document.getElementById("phasePill").textContent = "Phase "+phase;
+  const start = new Date((profile.plan_start_date || todayStr())+"T00:00:00");
+  const now = new Date(todayStr()+"T00:00:00");
+  const dayNum = Math.max(1, daysBetween(start, now)+1);
+  document.getElementById("dayCounter").textContent = `Day ${dayNum} · Week ${week}`;
+  document.getElementById("todayDate").textContent = new Date().toLocaleDateString(undefined,{weekday:'long', month:'short', day:'numeric'});
+  const notes = {
+    0: "Phase 0 (Weeks 1–2): build the base. No loaded gym work yet.",
+    1: "Phase 1 (Weeks 3–6): gym 3x/week, ~25 min sessions.",
+    2: "Phase 2 (Weeks 7–12+): progressive overload, longer walks."
+  };
+  document.getElementById("phaseNote").textContent = notes[phase];
+  document.getElementById("gymCard").style.display = phase===0 ? "none" : "block";
+  if(phase>0){
+    document.getElementById("gymDesc").textContent = phase===1
+      ? "3x/week, ~25 min. Check off what you completed today."
+      : "3-4x/week, progressive overload. Check off what you completed today.";
+    renderGymList(phase);
+  }
+  const quote = QUOTES[dayNum % QUOTES.length];
+  document.getElementById("quoteBox").innerHTML = `${quote[0]}` + (quote[1] ? `<small>${quote[1]}</small>` : "");
+  renderMissWarning();
+  renderStreak();
+  renderChecklist(phase);
+  renderTodayRing();
+  renderAlcoholRule(week);
+  renderRoadmap(week, phase, start);
+  renderMeasurementCharts();
+  document.getElementById("startDate").value = profile.plan_start_date || todayStr();
+  document.getElementById("goalLabel").value = profile.goal_label || "";
+  document.getElementById("goalDate").value = profile.goal_date || "";
+  document.getElementById("heightInput").value = profile.height_in || "";
+}
+
+function renderChecklist(phase){
+  const key = todayStr();
+  const entry = dayEntry(key);
+  const el = document.getElementById("checklist");
+  el.innerHTML = "";
+  CHECKLIST_BASE.forEach(item=>{
+    const div = document.createElement("div");
+    div.className = "item" + (entry[item.key] ? " done" : "");
+    let small = item.small || item["small"+phase] || item.small0;
+    div.innerHTML = `<div class="ic-chip"><i class="ti ${item.icon}" aria-hidden="true"></i></div><div class="txt">${item.label}<small>${small}</small></div><div class="box"></div>`;
+    div.onclick = ()=>{
+      entry[item.key] = !entry[item.key];
+      renderHeader();
+      pushDaily(key, entry);
+    };
+    el.appendChild(div);
+  });
+}
+
+function renderTodayRing(){
+  const entry = dayEntry(todayStr());
+  const done = coreItemsDone(entry);
+  const pct = Math.round((done/5)*100);
+  const ring = document.getElementById("todayRing");
+  if(ring) ring.style.setProperty("--pct", pct);
+  const txt = document.getElementById("todayRingText");
+  if(txt) txt.textContent = done + "/5";
+}
+
+function renderGymList(phase){
+  const key = todayStr();
+  const entry = dayEntry(key);
+  if(!entry.gym) entry.gym = {};
+  const list = phase===1 ? GYM_EXERCISES_P1 : GYM_EXERCISES_P2;
+  const el = document.getElementById("gymList");
+  el.innerHTML = "";
+  list.forEach((ex,i)=>{
+    const done = !!entry.gym[i];
+    const row = document.createElement("div");
+    row.className = "gymrow" + (done?" done":"");
+    row.innerHTML = `<span>${ex}</span><i class="ti ${done?'ti-check':'ti-circle'}" aria-hidden="true" style="color:${done?'var(--good)':'var(--muted)'}"></i>`;
+    row.onclick = ()=>{
+      entry.gym[i] = !entry.gym[i];
+      entry.gymDay = Object.values(entry.gym).some(v=>v);
+      renderGymList(phase);
+      pushDaily(key, entry);
+    };
+    el.appendChild(row);
+  });
+}
+
+function renderAlcoholRule(week){
+  let rule;
+  if(week<=2) rule = "Alcohol-free weekdays. Weekends capped at 2 drinks/day.";
+  else if(week<=4) rule = "Weekends only, capped at 2 drinks/day.";
+  else if(week<=12) rule = "Full 90-day alcohol-free stretch — this is the experiment window.";
+  else rule = "Reassess with real data: how you feel, sleep, libido, scale, energy.";
+  document.getElementById("alcoholRule").innerHTML =
+    `<span class="tag">Week ${week}</span> ${rule}<br><small style="color:var(--muted)">Alcohol adds calories, drives visceral fat, raises the enzyme converting testosterone to estrogen, and wrecks the deep sleep where testosterone is produced.</small>`;
+}
+
+function renderStreak(){
+  let streak = 0;
+  let d = new Date();
+  for(let i=0;i<400;i++){
+    const key = todayStr(d);
+    const entry = state.days[key];
+    const done = entry ? coreItemsDone(entry) : 0;
+    if(i===0 && done<3){ d.setDate(d.getDate()-1); continue; }
+    if(done>=3){ streak++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+  document.getElementById("streakNum").textContent = streak;
+}
+
+function renderMissWarning(){
+  const y1 = new Date(); y1.setDate(y1.getDate()-1);
+  const y2 = new Date(); y2.setDate(y2.getDate()-2);
+  const e1 = state.days[todayStr(y1)];
+  const e2 = state.days[todayStr(y2)];
+  const miss1 = !e1 || coreItemsDone(e1)<3;
+  const miss2 = !e2 || coreItemsDone(e2)<3;
+  const box = document.getElementById("missWarn");
+  if(miss1 && miss2){
+    box.innerHTML = `<div class="warnbox"><i class="ti ti-alert-triangle" aria-hidden="true"></i> You missed the last two days. This is the moment plans die — do something small today, even 10 minutes.</div>`;
+  } else if(miss1){
+    box.innerHTML = `<div class="goodbox">Yesterday was light. Get today in and the streak rule (never miss twice) is safe.</div>`;
+  } else {
+    box.innerHTML = "";
+  }
+}
+
+async function logWeighIn(){
+  const w = parseFloat(document.getElementById("weightInput").value);
+  const waist = parseFloat(document.getElementById("waistInput").value);
+  if(!w && !waist){ alert("Enter a weight or waist value first."); return; }
+  const record = {date: todayStr(), weight: isNaN(w)?null:w, waist: isNaN(waist)?null:waist};
+  state.weighins.push(record);
+  document.getElementById("weightInput").value="";
+  document.getElementById("waistInput").value="";
+  renderMeasurementCharts();
+  await pushWeighin(record);
+}
+
+function themeVar(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function drawTrendChart(canvasId, values, unit, targetValue){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width = canvas.clientWidth * 2;
+  const h = canvas.height = 120*2;
+  ctx.clearRect(0,0,w,h);
+  const lineColor = themeVar("--border"), accent = themeVar("--accent"), accent2 = themeVar("--accent2"), muted = themeVar("--muted"), good = themeVar("--good");
+  if(values.length<1){
+    ctx.fillStyle = muted; ctx.font = "20px sans-serif"; ctx.textAlign="center";
+    ctx.fillText("Log an entry to start this trend line", w/2, h/2);
+    return;
+  }
+  const allVals = targetValue ? values.concat([targetValue]) : values;
+  const min = Math.min(...allVals)-1, max = Math.max(...allVals)+1;
+  const range = (max-min) || 1;
+  const pad = 36;
+  ctx.strokeStyle = lineColor; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(pad,h-pad); ctx.lineTo(w-pad,h-pad); ctx.stroke();
+  if(targetValue){
+    const ty = h-pad - ((targetValue-min)/range)*(h-2*pad);
+    ctx.save();
+    ctx.strokeStyle = good; ctx.lineWidth=2; ctx.setLineDash([8,6]);
+    ctx.beginPath(); ctx.moveTo(pad,ty); ctx.lineTo(w-pad,ty); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = good; ctx.font="16px sans-serif"; ctx.textAlign="left";
+    ctx.fillText("Target: "+targetValue.toFixed(1)+" "+unit, pad+6, ty-8);
+  }
+  ctx.strokeStyle = accent; ctx.lineWidth=4; ctx.beginPath();
+  values.forEach((v,i)=>{
+    const x = pad + (i/(Math.max(1,values.length-1)))*(w-2*pad);
+    const y = h-pad - ((v-min)/range)*(h-2*pad);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  ctx.fillStyle=accent2;
+  values.forEach((v,i)=>{
+    const x = pad + (i/(Math.max(1,values.length-1)))*(w-2*pad);
+    const y = h-pad - ((v-min)/range)*(h-2*pad);
+    ctx.beginPath(); ctx.arc(x,y,5,0,7); ctx.fill();
+  });
+  ctx.fillStyle=muted; ctx.font="18px sans-serif"; ctx.textAlign="left";
+  ctx.fillText(max.toFixed(1)+" "+unit, 4, pad);
+  ctx.fillText(min.toFixed(1)+" "+unit, 4, h-pad+8);
+  ctx.textAlign="right";
+  ctx.fillText("Latest: "+values[values.length-1].toFixed(1)+" "+unit, w-4, 26);
+}
+
+function statTile(value, label, mood){
+  const cls = mood ? " " + mood : "";
+  return `<div class="stattile${cls}"><div class="v">${value}</div><div class="l">${label}</div></div>`;
+}
+
+function renderMeasurementCharts(){
+  const weights = state.weighins.filter(e=>e.weight!=null).map(e=>e.weight);
+  const waists = state.weighins.filter(e=>e.waist!=null).map(e=>e.waist);
+  // Guard against stray/placeholder height values (e.g. test data) — a real adult height is at least 48in.
+  const rawHeight = profile && profile.height_in ? Number(profile.height_in) : null;
+  const heightIn = (rawHeight && rawHeight >= 48 && rawHeight <= 96) ? rawHeight : null;
+  const waistTarget = heightIn ? heightIn/2 : null;
+  drawTrendChart("weightChart", weights, "lb");
+  drawTrendChart("waistChart", waists, "in", waistTarget);
+  const statsEl = document.getElementById("measureStats");
+  if(!statsEl) return;
+  let html = "";
+  if(weights.length>=2){
+    const lost = weights[0]-weights[weights.length-1];
+    html += statTile((lost>=0?"":"+")+Math.abs(lost).toFixed(1), lost>=0 ? "lb lost" : "lb gained", lost>=0?"on":"off");
+  }
+  if(waists.length>=2){
+    const lost = waists[0]-waists[waists.length-1];
+    html += statTile((lost>=0?"":"+")+Math.abs(lost).toFixed(1), lost>=0 ? "in off waist" : "in gained", lost>=0?"on":"off");
+  }
+  if(waistTarget && waists.length>=1){
+    const latest = waists[waists.length-1];
+    const onTarget = latest <= waistTarget;
+    const diff = Math.abs(latest-waistTarget).toFixed(1);
+    html += statTile(onTarget ? "On target" : diff+" in over", `waist-to-height target (<${waistTarget.toFixed(1)} in)`, onTarget?"on":"off");
+  } else if(rawHeight && !heightIn){
+    html += statTile("—", "enter a valid height (48–96 in) in Settings", "off");
+  }
+  statsEl.innerHTML = html;
+}
+
+function applyThemeIcon(){
+  const theme = document.documentElement.getAttribute("data-theme");
+  const icon = document.getElementById("themeToggleIcon");
+  if(icon) icon.className = theme === "light" ? "ti ti-sun" : "ti ti-moon";
+  const meta = document.getElementById("themeColorMeta");
+  if(meta) meta.setAttribute("content", theme === "light" ? "#f5f7fb" : "#0f1420");
+}
+
+function toggleTheme(){
+  const current = document.documentElement.getAttribute("data-theme");
+  const next = current === "light" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("dbr_theme", next);
+  applyThemeIcon();
+  if(!document.getElementById("mainApp").classList.contains("hidden")) renderMeasurementCharts();
+}
+
+async function saveMonthly(){
+  const energy = document.getElementById("energySlider").value;
+  const floorSit = document.querySelector('[data-mkey="floorSit"]').classList.contains("done");
+  const toeTouch = document.querySelector('[data-mkey="toeTouch"]').classList.contains("done");
+  const photo = document.querySelector('[data-mkey="photo"]').classList.contains("done");
+  const record = {date: todayStr(), energy, floorSit, toeTouch, photo};
+  state.monthly.push(record);
+  await pushMonthly(record);
+  alert("Monthly check saved.");
+}
+document.querySelectorAll('[data-mkey]').forEach(el=>{ el.onclick = ()=> el.classList.toggle("done"); });
+document.getElementById("energySlider").oninput = (e)=>{ document.getElementById("energyVal").textContent = e.target.value; };
+
+function renderRoadmap(week, phase, start){
+  const milestones = [
+    {label:"Phase 0 complete", when: addDays(start,14), text:"Base built: daily walking + mobility established, no back flare-ups.", atWeek:2},
+    {label:"Phase 1 complete", when: addDays(start,42), text:"Gym routine locked in 3x/week. Meaningful weight and waist movement.", atWeek:6},
+    {label:"3-Month mark", when: addDays(start,90), text:"Re-check labs if relevant. Reassess pace and adjust phase 2 loading.", atWeek:13},
+  ];
+  if(profile.goal_label && profile.goal_date){
+    const goalDate = new Date(profile.goal_date+"T00:00:00");
+    const goalWeek = Math.floor(daysBetween(start, goalDate)/7);
+    milestones.push({label: '<i class="ti ti-flag-3" aria-hidden="true"></i> '+profile.goal_label, when: goalDate.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}), text:"Your personal goal.", atWeek: goalWeek});
+    milestones.sort((a,b)=>a.atWeek-b.atWeek);
+  }
+  const el = document.getElementById("roadmap");
+  el.innerHTML = "";
+  if(milestones.length===0){ el.innerHTML = '<p class="sub">Set a personal goal in Settings to see it here.</p>'; return; }
+  milestones.forEach(m=>{
+    const hit = week > m.atWeek;
+    const div = document.createElement("div");
+    div.className = "milestone" + (hit?" hit":"") + (!hit && isCurrentTarget(m,week,milestones)?" active":"");
+    div.innerHTML = `<div class="dot"></div><div><div class="m-title">${m.label}</div><div class="m-when">Target: ${m.when}</div><div class="m-target">${m.text}</div></div>`;
+    el.appendChild(div);
+  });
+}
+function isCurrentTarget(m, week, milestones){
+  const upcoming = milestones.filter(x=>week<=x.atWeek);
+  return upcoming.length && upcoming[0]===m;
+}
+function addDays(startDate, n){
+  const d = new Date(startDate.getTime());
+  d.setDate(d.getDate()+n);
+  return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+}
+
+async function saveSettings(){
+  const heightVal = parseFloat(document.getElementById("heightInput").value);
+  const updates = {
+    plan_start_date: document.getElementById("startDate").value || todayStr(),
+    goal_label: document.getElementById("goalLabel").value.trim(),
+    goal_date: document.getElementById("goalDate").value || null,
+    height_in: isNaN(heightVal) ? null : heightVal,
+  };
+  const { error } = await sb.from("profiles").update(updates).eq("id", currentUser.id);
+  if(!error){ Object.assign(profile, updates); renderHeader(); renderMeasurementCharts(); setSyncStatus("Settings saved"); }
+  else setSyncStatus("Failed to save settings");
+}
+
+/* ---------------- Boot ---------------- */
+(async function init(){
+  applyThemeIcon();
+  const { data: { session } } = await sb.auth.getSession();
+  if(session){ await onSignedIn(); } else { showScreen("auth"); }
+  document.getElementById("priceAmount").textContent = DISPLAY_PRICE;
+})();
+window.addEventListener("resize", ()=>{ if(!document.getElementById("mainApp").classList.contains("hidden")) renderMeasurementCharts(); });
+</script>
+</body>
+</html>
