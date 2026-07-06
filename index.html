@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1014">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Dad Reset">
+  <title>Dad Bod Reset | 90-Day Fatherhood Fitness OS</title>
+  <meta name="description" content="A premium 90-day reset app for busy dads rebuilding strength, mobility, discipline, and visceral fat loss.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-frame">
+    <aside class="sidebar" aria-label="Primary">
+      <a class="brand" href="#home" data-route="home" aria-label="Dad Bod Reset home">
+        <span class="brand-mark"><i class="ti ti-flame"></i></span>
+        <span>
+          <strong>Dad Bod Reset</strong>
+          <small>90-Day OS</small>
+        </span>
+      </a>
+      <nav class="nav">
+        <a class="nav-link active" href="#home" data-route="home"><i class="ti ti-layout-dashboard"></i><span>Command</span></a>
+        <a class="nav-link" href="#today" data-route="today"><i class="ti ti-checkup-list"></i><span>Today</span></a>
+        <a class="nav-link" href="#health" data-route="health"><i class="ti ti-heart-rate-monitor"></i><span>Health</span></a>
+        <a class="nav-link" href="#plan" data-route="plan"><i class="ti ti-route"></i><span>Plan</span></a>
+        <a class="nav-link" href="#progress" data-route="progress"><i class="ti ti-chart-line"></i><span>Progress</span></a>
+        <a class="nav-link" href="#pricing" data-route="pricing"><i class="ti ti-credit-card"></i><span>Offer</span></a>
+      </nav>
+      <div class="sidebar-card">
+        <span class="eyebrow">Fatherhood Target</span>
+        <strong id="sidebarGoal">Carry my son without back pain</strong>
+        <div class="mini-meter" aria-hidden="true"><span id="sidebarMeter"></span></div>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <button class="icon-btn mobile-menu" id="mobileMenu" aria-label="Open menu"><i class="ti ti-menu-2"></i></button>
+        <div>
+          <span class="eyebrow">Built for bad backs, beer bellies, and busy calendars</span>
+          <h1 id="screenTitle">Command Center</h1>
+        </div>
+        <div class="top-actions">
+          <button class="icon-btn" id="themeBtn" aria-label="Toggle theme"><i class="ti ti-moon"></i></button>
+          <button class="primary-btn small" data-route="today"><i class="ti ti-player-play"></i><span>Start Today</span></button>
+        </div>
+      </header>
+
+      <section class="screen active" id="home" data-title="Command Center">
+        <div class="hero">
+          <div class="hero-media" role="img" aria-label="Training shoes and home workout gear before sunrise"></div>
+          <div class="hero-content">
+            <span class="badge"><i class="ti ti-shield-check"></i> 90-day reset protocol</span>
+            <h2>Become the dad your kid can chase, climb on, and count on.</h2>
+            <p>Track the boring basics that actually change belly fat, back pain, energy, and confidence: walking, mobility, protein, fasting windows, hydration, sleep, alcohol boundaries, and progressive strength.</p>
+            <div class="hero-actions">
+              <button class="primary-btn" data-route="onboarding"><i class="ti ti-rocket"></i><span>Personalize reset</span></button>
+              <button class="secondary-btn" data-route="plan"><i class="ti ti-map"></i><span>View 90 days</span></button>
+            </div>
+          </div>
+          <div class="hero-panel">
+            <span class="eyebrow">Today’s Minimum</span>
+            <strong>5 min walk + 10 min mobility + water + protein</strong>
+            <small>Small enough to start. Serious enough to compound.</small>
+          </div>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card">
+            <i class="ti ti-flame"></i>
+            <span>Current streak</span>
+            <strong id="streakMetric">0 days</strong>
+          </article>
+          <article class="metric-card">
+            <i class="ti ti-target-arrow"></i>
+            <span>Weight target</span>
+            <strong id="targetMetric">205 lb</strong>
+          </article>
+          <article class="metric-card">
+            <i class="ti ti-ruler-measure"></i>
+            <span>Waist target</span>
+            <strong id="waistMetric">32.5 in</strong>
+          </article>
+          <article class="metric-card">
+            <i class="ti ti-beer-off"></i>
+            <span>Alcohol rule</span>
+            <strong id="alcoholMetric">Weekdays off</strong>
+          </article>
+          <article class="metric-card">
+            <i class="ti ti-clock-hour-8"></i>
+            <span>Fasting protocol</span>
+            <strong id="fastMetric">14:10</strong>
+          </article>
+          <article class="metric-card">
+            <i class="ti ti-droplet"></i>
+            <span>Water target</span>
+            <strong id="waterMetric">10 cups</strong>
+          </article>
+        </div>
+
+        <div class="section-grid two">
+          <article class="panel">
+            <div class="panel-head">
+              <span>
+                <span class="eyebrow">Product Promise</span>
+                <h3>Not a workout app. A relapse-proof reset.</h3>
+              </span>
+              <i class="ti ti-lock-check"></i>
+            </div>
+            <div class="feature-list">
+              <div><i class="ti ti-check"></i><span>Phases designed for low mobility and back-sensitive starts.</span></div>
+              <div><i class="ti ti-check"></i><span>Daily checklist keeps the user out of all-or-nothing thinking.</span></div>
+              <div><i class="ti ti-check"></i><span>Fasting and hydration are simple enough for real life, not influencer theater.</span></div>
+              <div><i class="ti ti-check"></i><span>Progress focuses on waist, stamina, pain, energy, and consistency.</span></div>
+              <div><i class="ti ti-check"></i><span>Built around fatherhood identity, not shame or gym culture.</span></div>
+            </div>
+          </article>
+
+          <article class="panel contrast">
+            <span class="eyebrow">Launch Positioning</span>
+            <h3>For men who need to become useful in their body again.</h3>
+            <p>The app should sell the transformation before it asks for data. This version leads with the emotional reason, then gives a clear system.</p>
+            <button class="secondary-btn" data-route="pricing"><i class="ti ti-cash"></i><span>See offer page</span></button>
+          </article>
+        </div>
+      </section>
+
+      <section class="screen" id="onboarding" data-title="Personalize Reset">
+        <div class="onboarding-layout">
+          <article class="panel">
+            <span class="eyebrow">2-minute setup</span>
+            <h2 class="screen-heading">Set the first mission.</h2>
+            <p class="lead">This stays local in your browser for the prototype. It can be connected to Supabase later.</p>
+            <form id="profileForm" class="form-grid">
+              <label>Current weight <input type="number" id="weightStart" min="120" max="500" step="0.1" value="245"></label>
+              <label>Target weight <input type="number" id="weightGoal" min="120" max="500" step="0.1" value="205"></label>
+              <label>Height in inches <input type="number" id="heightIn" min="48" max="96" step="0.5" value="65"></label>
+              <label>Waist now <input type="number" id="waistStart" min="20" max="80" step="0.1" value="48"></label>
+              <label>Baby due in weeks <input type="number" id="babyWeeks" min="1" max="52" step="1" value="16"></label>
+              <label>Water goal, cups/day <input type="number" id="waterGoal" min="4" max="24" step="1" value="10"></label>
+              <label>Fasting window <input type="text" id="fastingWindow" value="14:10"></label>
+              <label>Primary goal <input type="text" id="goalText" value="Carry my son without back pain"></label>
+              <button class="primary-btn span" type="submit"><i class="ti ti-device-floppy"></i><span>Save reset profile</span></button>
+            </form>
+          </article>
+          <aside class="coach-card">
+            <span class="eyebrow">Coach Note</span>
+            <h3>First goal: lose 12-25 lb, not 70.</h3>
+            <p>That first 5-10% is where pain, labs, sleep, libido, and confidence often start moving. The app should reward the early physiological wins.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="screen" id="today" data-title="Today’s Reset">
+        <div class="today-layout">
+          <article class="panel today-card">
+            <div class="panel-head">
+              <span>
+                <span class="eyebrow" id="todayLabel">Day 1 | Phase 0</span>
+                <h2 class="screen-heading">Win the minimum.</h2>
+              </span>
+              <div class="progress-ring" id="progressRing"><span id="progressText">0/6</span></div>
+            </div>
+            <div class="task-list" id="taskList"></div>
+          </article>
+          <aside class="side-stack">
+            <article class="panel">
+            <span class="eyebrow">Pain-smart rule</span>
+            <h3>Stop before the back gets loud.</h3>
+            <p>Use short walks, chair-based strength, and mobility that does not trigger sharp pain. The winning plan is the one your body lets you repeat tomorrow.</p>
+            <div class="quick-log">
+              <label>Pain today <input type="range" id="painRange" min="1" max="10" value="4"></label>
+              <label>Energy today <input type="range" id="energyRange" min="1" max="10" value="5"></label>
+            </div>
+            <button class="secondary-btn full" id="resetDay"><i class="ti ti-refresh"></i><span>Clear today</span></button>
+            </article>
+
+            <article class="panel tracker-card">
+              <span class="eyebrow">Fuel Control</span>
+              <h3>Fast, hydrate, then eat like an adult.</h3>
+              <div class="fasting-switch" id="fastingSwitch" aria-label="Fasting mode"></div>
+              <div class="fasting-status" id="fastingStatus"></div>
+              <div class="water-head">
+                <span><strong id="waterCount">0</strong><small id="waterGoalLabel">/10 cups</small></span>
+                <button class="secondary-btn" id="addWater"><i class="ti ti-plus"></i><span>Add cup</span></button>
+              </div>
+              <div class="water-grid" id="waterGrid"></div>
+              <button class="secondary-btn full" id="resetWater"><i class="ti ti-droplet-off"></i><span>Reset water</span></button>
+            </article>
+
+            <article class="panel food-stack-card">
+              <span class="eyebrow">Visceral Fat Stack</span>
+              <h3>Add the right signals.</h3>
+              <p>Small daily foods that support inflammation, insulin sensitivity, and fat-burning pathways.</p>
+              <div class="food-stack" id="foodStack"></div>
+            </article>
+          </aside>
+        </div>
+      </section>
+
+      <section class="screen" id="health" data-title="Health Board">
+        <div class="section-grid two">
+          <article class="panel">
+            <span class="eyebrow">Overlooked but important</span>
+            <h2 class="screen-heading">Track the medical follow-through.</h2>
+            <p class="lead">This is the credibility layer: back pain, belly fat, breast growth, libido, fatigue, alcohol, and possible sleep apnea should be followed like data, not guessed at.</p>
+            <div class="health-list" id="healthList"></div>
+          </article>
+          <article class="panel contrast">
+            <span class="eyebrow">Advisor Recommendation</span>
+            <h3>What I would include before selling this.</h3>
+            <div class="feature-list">
+              <div><i class="ti ti-stethoscope"></i><span>Doctor-prep checklist for labs, testosterone follow-up, sleep apnea, and back-pain referral.</span></div>
+              <div><i class="ti ti-moon-stars"></i><span>Sleep score and snoring/apnea prompts, because bad sleep can crush fat loss and testosterone.</span></div>
+              <div><i class="ti ti-users"></i><span>Partner mode: one weekly check-in message for accountability before the baby arrives.</span></div>
+              <div><i class="ti ti-chef-hat"></i><span>Meal templates with protein, fiber, and alcohol replacement rituals.</span></div>
+              <div><i class="ti ti-alert-triangle"></i><span>Clear red-flag guidance so the app feels responsible, not reckless.</span></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="screen" id="plan" data-title="90-Day Plan">
+        <div class="section-grid three">
+          <article class="phase-card active">
+            <span>Weeks 1-2</span>
+            <h3>Phase 0: Base</h3>
+            <p>Short walks, daily mobility, protein anchor, alcohol boundary. No heroic gym plan yet.</p>
+          </article>
+          <article class="phase-card">
+            <span>Weeks 3-6</span>
+            <h3>Phase 1: Rebuild</h3>
+            <p>3 strength sessions weekly, machines and carries, walking volume up, meals tightened.</p>
+          </article>
+          <article class="phase-card">
+            <span>Weeks 7-12</span>
+            <h3>Phase 2: Load</h3>
+            <p>Progressive overload, longer walks, waist target, sleep consistency, alcohol-free sprint.</p>
+          </article>
+        </div>
+        <article class="panel intensity-panel">
+          <div class="panel-head">
+            <span>
+              <span class="eyebrow">Exercise Multiplier</span>
+              <h3>Use the talk test, not punishment.</h3>
+            </span>
+            <i class="ti ti-activity-heartbeat"></i>
+          </div>
+          <div class="intensity-grid">
+            <div><strong>Phase 0</strong><span>Easy walk. You can talk normally. Stop before back pain escalates.</span></div>
+            <div><strong>Phase 1</strong><span>Brisk walk or bike. You can talk in short sentences, but cannot sing.</span></div>
+            <div><strong>Phase 2</strong><span>2-3 weekly aerobic sessions. Add controlled intervals only if back and doctor clearance allow.</span></div>
+          </div>
+        </article>
+        <article class="panel timeline-panel">
+          <span class="eyebrow">Roadmap</span>
+          <div class="timeline" id="timeline"></div>
+        </article>
+      </section>
+
+      <section class="screen" id="progress" data-title="Progress">
+        <div class="section-grid two">
+          <article class="panel">
+            <span class="eyebrow">Weigh-in</span>
+            <h2 class="screen-heading">Trend, not drama.</h2>
+            <form id="measureForm" class="measure-form">
+              <label>Weight <input type="number" id="weightLog" step="0.1" placeholder="243.5"></label>
+              <label>Waist <input type="number" id="waistLog" step="0.1" placeholder="47.5"></label>
+              <button class="primary-btn" type="submit"><i class="ti ti-plus"></i><span>Log</span></button>
+            </form>
+            <canvas id="weightCanvas" height="180"></canvas>
+          </article>
+          <article class="panel">
+            <span class="eyebrow">Body Composition Signals</span>
+            <h3>What the product should celebrate</h3>
+            <div class="score-list" id="scoreList"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="screen" id="pricing" data-title="Offer Page">
+        <div class="pricing-layout">
+          <article class="offer-copy">
+            <span class="badge"><i class="ti ti-sparkles"></i> Marketable package</span>
+            <h2>Sell the system, not the checklist.</h2>
+            <p>Position this as a fatherhood fitness operating system for men who are starting from pain, fatigue, belly fat, and low confidence.</p>
+          </article>
+          <article class="price-card">
+            <span class="eyebrow">Suggested starter offer</span>
+            <strong>$9<span>/month</span></strong>
+            <p>Daily reset app, 90-day plan, progress dashboard, alcohol boundary protocol, mobility-first training, and exportable logs.</p>
+            <button class="primary-btn full"><i class="ti ti-lock-open"></i><span>Unlock Reset</span></button>
+            <button class="secondary-btn full" id="exportBtn"><i class="ti ti-download"></i><span>Export demo data</span></button>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
